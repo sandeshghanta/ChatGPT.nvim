@@ -29,6 +29,7 @@ function Api.make_call(url, params, cb)
       command = "curl",
       args = {
         url,
+        "-k",
         "-H",
         "Content-Type: application/json",
         "-H",
