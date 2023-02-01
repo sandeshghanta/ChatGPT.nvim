@@ -108,7 +108,7 @@ end
 --
 
 function Session.get_dir()
-  local dir = Path:new("~/.local/state/nvim"):joinpath("chatgpt")
+  local dir = Path:new("/home/ir/.local/state/nvim"):joinpath("chatgpt")
   if not dir:exists() then
     dir:mkdir()
   end
