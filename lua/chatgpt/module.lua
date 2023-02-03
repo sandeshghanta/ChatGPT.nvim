@@ -14,7 +14,6 @@ local Settings = require("chatgpt.settings")
 local Sessions = require("chatgpt.flows.chat.sessions")
 local Session = require("chatgpt.flows.chat.session")
 local Actions = require("chatgpt.flows.actions")
-local Tokens = require("chatgpt.flows.chat.tokens")
 
 local namespace_id = vim.api.nvim_create_namespace("ChatGPTNS")
 
@@ -31,19 +30,6 @@ local open_chat = function()
       return
     end
 
-    extmark_id = vim.api.nvim_buf_set_extmark(chat_input.bufnr, namespace_id, 0, -1, {
-      virt_text = {
-        { "", "ChatGPTTotalTokensBorder" },
-        { "" .. suffix, "ChatGPTTotalTokens" },
-        { "", "ChatGPTTotalTokensBorder" },
-        { " ", "" },
-      },
-      virt_text_pos = "right_align",
-    })
-  end
-  local function display_total_tokens()
-    local total_tokens = chat:get_total_tokens()
-    display_input_suffix("TOKENS: " .. total_tokens .. " / PRICE: $" .. Tokens.usage_in_dollars(total_tokens))
   end
 
   local scroll_chat = function(direction)
@@ -79,7 +65,6 @@ local open_chat = function()
       local params = vim.tbl_extend("keep", { prompt = chat:toString() }, Settings.params)
       Api.completions(params, function(answer, usage)
         chat:addAnswer(answer, usage)
-        display_total_tokens()
       end)
     end),
   })
@@ -88,7 +73,6 @@ local open_chat = function()
   local settings_panel = Settings.get_settings_panel("completions", params)
   local sessions_panel = Sessions.get_panel(function(session)
     chat:set_session(session)
-    display_total_tokens()
   end)
   layout = Layout(
     Config.options.chat_layout,
@@ -168,7 +152,6 @@ local open_chat = function()
       popup:map(mode, Config.options.keymaps.new_session, function()
         chat:new_session()
         Sessions:refresh()
-        display_total_tokens()
       end, {})
     end
   end
@@ -201,13 +184,12 @@ local open_chat = function()
   -- set custom filetype
   vim.api.nvim_buf_set_option(chat_window.bufnr, "filetype", Config.options.chat_window.filetype)
 
-  return chat, chat_input, chat_window, display_total_tokens
+  return chat, chat_input, chat_window
 end
 
 M.openChat = function()
-  local chat, _, _, display_total_tokens = open_chat()
+  local chat, _, _ = open_chat()
   chat:welcome()
-  display_total_tokens()
 end
 
 M.open_chat_with_awesome_prompt = function()
@@ -217,7 +199,7 @@ M.open_chat_with_awesome_prompt = function()
       local session = Session.new({ name = act })
       session:save()
 
-      local chat, _, chat_window, display_total_tokens = open_chat()
+      local chat, _, chat_window = open_chat()
       -- TODO: dry
       chat_window.border:set_text("top", " ChatGPT - Acts as " .. act .. " ", "center")
 
@@ -227,7 +209,6 @@ M.open_chat_with_awesome_prompt = function()
       local params = vim.tbl_extend("keep", { prompt = chat:toString() }, Settings.params)
       Api.completions(params, function(answer, usage)
         chat:addAnswer(answer, usage)
-        display_total_tokens()
       end)
     end),
   })

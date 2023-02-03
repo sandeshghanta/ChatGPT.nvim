@@ -2,7 +2,6 @@ local Config = require("chatgpt.config")
 local Utils = require("chatgpt.utils")
 local Spinner = require("chatgpt.spinner")
 local Session = require("chatgpt.flows.chat.session")
-local Tokens = require("chatgpt.flows.chat.tokens")
 
 local Chat = {}
 Chat.__index = Chat
@@ -134,17 +133,6 @@ function Chat:addAnswer(text, usage)
   self:add(ANSWER, text, usage)
 end
 
-function Chat:get_total_tokens()
-  local total_tokens = 0
-  for i = 1, #self.messages, 1 do
-    local tokens = self.messages[i].usage.total_tokens
-    if tokens ~= nil then
-      total_tokens = total_tokens + tokens
-    end
-  end
-  return total_tokens
-end
-
 function Chat:next()
   local count = self:count()
   if self.selectedIndex < count then
@@ -194,22 +182,6 @@ function Chat:renderLastMessage()
     for index, _ in ipairs(lines) do
       self:add_highlight("ChatGPTQuestion", msg.start_line + index - 1, 0, -1)
     end
-  else
-    -- local total_tokens = msg.usage.total_tokens
-    -- if total_tokens ~= nil then
-    --   vim.api.nvim_buf_set_extmark(self.bufnr, Config.namespace_id, msg.end_line, -1, {
-    --     virt_text = {
-    --       { "", "ChatGPTTotalTokensBorder" },
-    --       {
-    --         "TOKENS: " .. msg.usage.total_tokens .. " / PRICE: $" .. Tokens.usage_in_dollars(msg.usage.total_tokens),
-    --         "ChatGPTTotalTokens",
-    --       },
-    --       { "", "ChatGPTTotalTokensBorder" },
-    --       { " ", "" },
-    --     },
-    --     virt_text_pos = "right_align",
-    --   })
-    -- end
   end
 
   if self.selectedIndex > 2 then

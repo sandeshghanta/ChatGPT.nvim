@@ -23,15 +23,6 @@ local display_input_suffix = function(suffix)
     return
   end
 
-  extmark_id = vim.api.nvim_buf_set_extmark(instructions_input.bufnr, namespace_id, 0, -1, {
-    virt_text = {
-      { "", "ChatGPTTotalTokensBorder" },
-      { "" .. suffix, "ChatGPTTotalTokens" },
-      { "", "ChatGPTTotalTokensBorder" },
-      { " ", "" },
-    },
-    virt_text_pos = "right_align",
-  })
 end
 
 local spinner = Spinner:new(function(state)
@@ -102,7 +93,6 @@ M.edit_with_instructions = function()
         output = Utils.split_string_by_line(output_txt)
 
         vim.api.nvim_buf_set_lines(output_window.bufnr, 0, -1, false, output)
-        display_input_suffix(usage.total_tokens)
       end)
     end),
   })
